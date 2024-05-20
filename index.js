@@ -9,7 +9,8 @@ const db = new pg.Client({
   user: "postgres",
   host: "localhost",
   database: "world",
-  password: "bhabiteradewardiwana",
+  // password: "bhabiteradewardiwana",
+  password: "helloworld",
   port: 5432,
 });
 db.connect();
@@ -55,19 +56,19 @@ app.get("/", async (req, res) => {
 });
 app.post("/add", async (req, res) => {
   const input = req.body["country"];
-
+  console.log(input);
   try {
     const result = await db.query(
       "SELECT country_code FROM countries WHERE LOWER(country_name) LIKE '%' || $1 || '%';",
       [input.toLowerCase()]
     );
-
+    // console.log(result);
     const data = result.rows[0];
     const countryCode = data.country_code;
     try {
       await db.query(
-        "INSERT INTO visited_countries (country_code) VALUES ($1)",
-        [countryCode]
+        "INSERT INTO visited_countries (country_code,user_id) VALUES ($1,$2)",
+        [countryCode,currentUser]
       );
       res.redirect("/");
     } catch (err) {
@@ -80,7 +81,6 @@ app.post("/add", async (req, res) => {
 app.post("/user", async (req, res) => {
   if(req.body.add == "new"){
     res.render("new.ejs");
-    return
   }
   currentUser = req.body.user;
   res.redirect("/");
